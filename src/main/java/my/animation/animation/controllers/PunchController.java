@@ -14,12 +14,11 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.util.Duration;
 
 public class PunchController {
-    @FXML private VBox parent;
+    @FXML private AnchorPane parent;
     Image image = new Image("file:src/main/resources/Images/jump.png");
     private int currentFrame = 0;
     private GridPane grid;
@@ -30,8 +29,19 @@ public class PunchController {
 
     private Scene scene;
     private boolean first = true;
+    private boolean JUMP = false;
+
+    private boolean isWalking = false;
+    private boolean isReverse = false;
+
+    private boolean FLIP = false;
+
+    private int x = 540;
+    private int y = 295;
 
     public void initialize() {
+        Image background = new Image("file:src/main/resources/Images/background.png");
+        parent.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,BackgroundSize.DEFAULT)));
         Image image = new Image("file:src/main/resources/Images/jump.png");
         grid = new GridPane();
         PauseTransition delay = new PauseTransition(Duration.millis(100));
@@ -44,19 +54,43 @@ public class PunchController {
                 if(first) {
                     scene = parent.getScene();
                     setJump(delay);
+                    setWalk(delay);
                     first = false;
                 }
+
+                if (isWalking) {
+                    walk();
+                    if(isReverse) x += 12;
+                    if(x >= -6 && x <= 48) y -= 3;
+                    if(x >= -6 && x <= 48 && isReverse) y += 6;
+                    x -= 6;
+                }
+                else if(FLIP){
+                    x += 6;
+                }
+                else if(JUMP){
+
+                }
+                else {
+                    currentFrame = 0;
+                    loadFirstAnimation();
+                }
+
                 parent.getChildren().clear();
                 ImageView currentImageView = (ImageView) grid.getChildren().get(currentFrame);
                 ImageView newView = new ImageView(currentImageView.getImage());
+                newView.setLayoutX(x);
+                newView.setLayoutY(y);
+                if(isReverse) newView.setScaleX(-1);
+                else newView.setScaleX(1);
+
                 parent.getChildren().add(newView);
 
                 currentFrame++;
-
                 if (currentFrame >= grid.getChildren().size()) {
-                    stop();
+                    JUMP = false;
                     currentFrame = 0;
-                    loadFirstAnimation();
+                    stop();
                 }
             }
         };
@@ -68,9 +102,16 @@ public class PunchController {
         });
         delay.play();
 
-        parent.setOnMouseClicked(click -> {
+        parent.setOnMousePressed(click -> {
             currentFrame = 0;
             loadSecondAnimation();
+            FLIP = true;
+            delay.play();
+        });
+        parent.setOnMouseReleased(release -> {
+            currentFrame = 0;
+            loadFirstAnimation();
+            FLIP = false;
             delay.play();
         });
     }
@@ -118,9 +159,44 @@ public class PunchController {
             if(keyEvent.getCode() == KeyCode.SPACE){
                 currentFrame = 0;
                 jump();
+                JUMP = true;
                 delay.play();
             }
         });
+    }
+
+    public void walk(){
+        grid.getChildren().clear();
+        for (int x = 0; x < 6; x++) {
+            ImageView imageView = new ImageView(crop(image, x * cellWidth, 1 * cellHeight, cellWidth, cellHeight));
+            grid.add(imageView, x, 0);
+        }
+    }
+
+
+    public void setWalk(Transition delay){
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if(keyEvent.getCode() == KeyCode.A){
+                isWalking = true;
+            }
+
+            if(keyEvent.getCode() == KeyCode.D){
+                isWalking = true;
+                isReverse = true;
+            }
+        });
+
+        scene.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+            if(keyEvent.getCode() == KeyCode.A){
+                isWalking = false;
+            }
+
+            if(keyEvent.getCode() == KeyCode.D){
+                isWalking = false;
+                isReverse = false;
+            }
+        });
+
     }
 }
 

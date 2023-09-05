@@ -97,7 +97,7 @@ public class HelloController {
                 Stage stage = (Stage) currentScene.getWindow();
                 stage.close();
 
-                Scene newScene = new Scene(newRoot, 100, 100);
+                Scene newScene = new Scene(newRoot, 600, 400);
                 punchController.setScene(newScene);
                 stage.setScene(newScene);
                 stage.show();
