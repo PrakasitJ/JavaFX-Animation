@@ -22,6 +22,7 @@ import java.net.URL;
 
 public class HelloController {
     @FXML private VBox parent;
+    Scene scene;
 
     @FXML
     public void initialize(){
@@ -90,12 +91,17 @@ public class HelloController {
             FXMLLoader fxmlLoader = new FXMLLoader(url);
             try {
                 Parent newRoot = fxmlLoader.load();
+                PunchController punchController = fxmlLoader.getController();
+
                 Scene currentScene = parent.getScene();
                 Stage stage = (Stage) currentScene.getWindow();
                 stage.close();
+
                 Scene newScene = new Scene(newRoot, 100, 100);
+                punchController.setScene(newScene);
                 stage.setScene(newScene);
                 stage.show();
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
