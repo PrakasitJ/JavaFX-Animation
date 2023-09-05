@@ -42,6 +42,7 @@ public class PunchController {
             @Override
             public void handle(long l) {
                 if(first) {
+                    scene = parent.getScene();
                     setJump(delay);
                     first = false;
                 }
